@@ -1,36 +1,40 @@
 <template>
   <li class="node-tree" v-if="active">
-    <div v-if="isNaN(itemKey)">
+    <div v-if="isNaN(itemKey) && nodeType !== 'list'">{{itemKey}}</div>
+    <div v-if="nodeType === 'list'" class="list-control">
       {{itemKey}}
-      <span v-if="isList">{{activeIndex + 1}}/{{childrens.length}}</span>
-    </div>
-    <key-input
-      v-for="(field,i) in fields"
-      :id="field"
-      :key="field"
-      :label="field"
-      :fieldValue="item[field]"
-      :path="generatePath(field,i)"
-      :fieldToUpdate="field"
-      placeholder
-      type="text"
-      @callback="updateValue"
-    />
-    <div v-if="isList" class="list-control">
+      <span v-if="nodeType === 'list'">{{activeIndex + 1}}/{{childrens.length}}</span>
       <button @click="previous" class="btn btn-link">⟵</button>
       <button @click="addNode" class="btn btn-link">Add</button>
       <button @click="removeNode" :disabled="childrens.length < 2" class="btn btn-link">Remove</button>
       <button @click="next" class="btn btn-link">⟶</button>
     </div>
+    <div v-if="nodeType === 'array'">
+      <button @click="addNode" class="btn btn-link">Add</button>
+    </div>
     <ul>
+      <key-input
+        v-for="(field,i) in fields"
+        :parentType="nodeType"
+        :id="field"
+        :key="field"
+        :label="field"
+        :fieldValue="item[field]"
+        :path="generatePath(field,i)"
+        :fieldToUpdate="field"
+        placeholder="Type here..."
+        type="text"
+        @callback="updateValue"
+        @removeNode="removeArrayNode"
+      />
       <node
         v-for="(child,i) in childrens"
-        :isList="Array.isArray(item[child])"
+        :nodeType="getType(item[child])"
         :path="generatePath(child,i)"
         :item="item[child]"
         :itemKey="child"
         :key="i"
-        :active="isList ? i === activeIndex : true"
+        :active="nodeType === 'list' ? i === activeIndex : true"
         @addNode="addNode"
         @callback="updateValue"
       ></node>
@@ -39,13 +43,21 @@
 </template>
 
 <script>
-import KeyInput from './KeyInput';
-import v4 from 'uuid/v4';
 import _ from 'lodash';
+import KeyInput from './KeyInput';
 
 export default {
   name: 'node',
-  props: ['item', 'level', 'path', 'index', 'itemKey', 'active', 'isList'],
+  props: [
+    'item',
+    'level',
+    'path',
+    'index',
+    'itemKey',
+    'active',
+    'isList',
+    'nodeType',
+  ],
 
   created() {
     this.template = _.cloneDeep(this.item);
@@ -61,27 +73,35 @@ export default {
   },
   computed: {
     fields() {
-      return Object.keys(this.item).filter(k => {
-        if (typeof this.item[k] === 'string') return k;
-      });
+      return Object.keys(this.item).filter(
+        k => typeof this.item[k] === 'string',
+      );
     },
 
     childrens() {
-      return Object.keys(this.item).filter(k => {
-        if (typeof this.item[k] !== 'string') return k;
-      });
+      return Object.keys(this.item).filter(
+        k => typeof this.item[k] !== 'string',
+      );
     },
   },
   methods: {
+    getType(o) {
+      if (_.isArray(o)) {
+        if (_.isObject(o[0])) {
+          return 'list';
+        }
+        return 'array';
+      } else if (_.isObject(o)) {
+        return 'object';
+      }
+      return 'string';
+    },
     isActive(child) {
-      const k = parseInt(child);
+      const k = parseInt(child, 10);
       if (k && !isNaN(k)) {
         return k === this.activeIndex;
       }
       return true;
-    },
-    getId() {
-      return v4().slice(-8);
     },
     generatePath(name, i) {
       let path = '';
@@ -92,7 +112,7 @@ export default {
       }
       return path;
     },
-    addNode(index) {
+    addNode() {
       const x = _.cloneDeep(this.template[0]);
       const updatedVal = [...this.item, x];
       this.$emit('callback', this.itemKey, updatedVal);
@@ -105,25 +125,27 @@ export default {
           ...this.item.slice(this.activeIndex + 1),
         ];
         this.$emit('callback', this.itemKey, updatedVal);
+        this.$nextTick(() => {
+          this.previous();
+        });
+      }
+    },
+    removeArrayNode(i) {
+      if (this.item.length > 1) {
+        this.item.splice(i, 1);
       }
     },
     previous() {
       this.activeIndex =
-        (this.activeIndex - 1 + this.childrens.length) % this.childrens.length;
+        (this.activeIndex + (this.item.length - 1)) % this.item.length;
     },
     next() {
       this.activeIndex =
-        (this.activeIndex + 1 + this.childrens.length) % this.childrens.length;
+        (this.activeIndex + this.item.length + 1) % this.item.length;
     },
     updateValue(path, value) {
-      console.log(path, value);
       this.$set(this.item, path, value);
     },
-    updateStringValues(path, value) {
-      console.log(path, value);
-      this.item[path] = value;
-    },
-
     pre(o) {
       return JSON.stringify(o, null, 4);
     },

@@ -1,33 +1,36 @@
 <template>
   <div>
-    <b-tabs>
-      <b-tab title="template">
-        <pre>{{pre(template)}}</pre>
-      </b-tab>
-      <b-tab title="UI model">
-        <pre>{{pre(contents[0])}}</pre>
-      </b-tab>
-      <b-tab title="UI">
-        <div class="tree">
-          <ul class="tree-list">
-            <node-tree
-              v-for="(item,i) in contents"
-              :key="i"
-              :index="i"
-              :item="item"
-              :level="0"
-              :active="true"
-            ></node-tree>
-          </ul>
-        </div>
-      </b-tab>
-      <b-tab title="backend">
-        <pre>{{pre(serialize(contents[0]))}}</pre>
-      </b-tab>
-      <b-tab title="deserialized">
-        <pre>{{pre(deserialize(serialize(contents[0])))}}</pre>
-      </b-tab>
-    </b-tabs>
+    <h1 class="m-4">Form Generator</h1>
+    <div class="container mt-2">
+      <b-tabs>
+        <b-tab class="m-5" title="Template">
+          <pre>{{pre(template)}}</pre>
+        </b-tab>
+        <b-tab class="m-5" title="UI model">
+          <pre>{{pre(contents[0])}}</pre>
+        </b-tab>
+        <b-tab class="mt-3 col-10" title="UI">
+          <div class="tree">
+            <ul class="tree-list">
+              <node-tree
+                v-for="(item,i) in contents"
+                :key="i"
+                :index="i"
+                :item="item"
+                :level="0"
+                :active="true"
+              ></node-tree>
+            </ul>
+          </div>
+        </b-tab>
+        <b-tab class="m-5" title="Serialized">
+          <pre>{{pre(serialize(contents[0]))}}</pre>
+        </b-tab>
+        <b-tab class="m-5" title="Deserialized">
+          <pre>{{pre(deserialize(serialize(contents[0])))}}</pre>
+        </b-tab>
+      </b-tabs>
+    </div>
   </div>
 </template>
 <script>
@@ -40,8 +43,8 @@ export default {
   name: 'template-content',
   data() {
     return {
+      template,
       contents: [parseTemplate(template)],
-      template: template,
     };
   },
   components: {
@@ -54,10 +57,7 @@ export default {
     entries(obj) {
       return Object.entries(obj);
     },
-    updateField(field, text) {
-      // this.fields[field] = text;
-      // console.log(text);
-    },
+    updateField() {},
 
     pre(o) {
       return JSON.stringify(o, null, 2);

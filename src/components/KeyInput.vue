@@ -1,15 +1,20 @@
 <template>
-  <div class="form-group">
-    <label for>{{ label }}</label>
-    <input
-      :type="inputType"
-      class="form-control"
-      :id="id"
-      :placeholder="placeHolder"
-      v-model="inlineVal"
-      @keyup="onInputChange"
-    >
-  </div>
+  <li class="form-row">
+    <div class="form-group col">
+      <label v-if="parentType !== 'array'" for>{{ label }}</label>
+      <input
+        :type="inputType"
+        class="form-control"
+        :id="id"
+        :placeholder="placeholder"
+        v-model="inlineVal"
+        @keyup="onInputChange"
+      >
+    </div>
+    <div v-if="parentType === 'array'" class="form-group">
+      <button class="btn btn-outline-primary" @click.stop="$emit('removeNode',parseInt(label))">x</button>
+    </div>
+  </li>
 </template>
 
 <script>
@@ -33,10 +38,10 @@ export default {
     path: {
       type: String,
     },
-    parent: {
+    parentType: {
       type: String,
     },
-    placeHolder: {
+    placeholder: {
       type: String,
       default: 'Type something here',
     },
@@ -50,7 +55,7 @@ export default {
     };
   },
   methods: {
-    onInputChange(e) {
+    onInputChange() {
       this.$emit('callback', this.label, this.inlineVal);
     },
   },
