@@ -1,4 +1,4 @@
-# test-project
+# vue-generate-form
 
 > A Vue.js project
 
