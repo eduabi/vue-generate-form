@@ -10,7 +10,18 @@ const template = [
   {
     name: 'Player',
     isList: true,
-    children: [{ name: 'Name', children: [] }, { name: 'Age', children: [] }],
+    children: [
+      { name: 'Name', children: [] },
+      { name: 'Age', children: [] },
+      {
+        name: 'Address',
+        isList: true,
+        children: [
+          { name: 'Local', children: [] },
+          { name: 'Permanent', children: [] },
+        ],
+      },
+    ],
   },
   {
     name: 'Fanclubs',

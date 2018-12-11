@@ -7,7 +7,7 @@
       :id="id"
       :placeholder="placeHolder"
       v-model="inlineVal"
-      @keyup.stop="onInputChange"
+      @keyup="onInputChange"
     >
   </div>
 </template>
@@ -30,7 +30,10 @@ export default {
     fieldValue: {
       type: String,
     },
-    fieldToUpdate: {
+    path: {
+      type: String,
+    },
+    parent: {
       type: String,
     },
     placeHolder: {
@@ -47,8 +50,8 @@ export default {
     };
   },
   methods: {
-    onInputChange() {
-      this.$emit('callback', this.fieldToUpdate, this.inlineVal);
+    onInputChange(e) {
+      this.$emit('callback', this.label, this.inlineVal);
     },
   },
   created() {
