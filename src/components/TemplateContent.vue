@@ -7,27 +7,26 @@
           <pre>{{pre(template)}}</pre>
         </b-tab>
         <b-tab class="m-5" title="UI model">
-          <pre>{{pre(contents[0])}}</pre>
+          <pre>{{pre(contents.templateValues)}}</pre>
         </b-tab>
         <b-tab class="mt-3 col-10" title="UI">
           <div class="tree">
             <ul class="tree-list">
-              <node-tree
-                v-for="(item,i) in contents"
-                :key="i"
-                :index="i"
-                :item="item"
-                :level="0"
-                :active="true"
-              ></node-tree>
+              <node-tree :item="contents" active="true"></node-tree>
             </ul>
           </div>
         </b-tab>
         <b-tab class="m-5" title="Serialized">
-          <pre>{{pre(serialize(contents[0]))}}</pre>
+          <div :key="i" v-for="(value,i) in contents.templateValues">
+            <strong>Template Value - {{i + 1}}</strong>
+            <pre>{{pre(serialize(value))}}</pre>
+          </div>
         </b-tab>
         <b-tab class="m-5" title="Deserialized">
-          <pre>{{pre(deserialize(serialize(contents[0])))}}</pre>
+          <div v-for="(value, i) in contents.templateValues" :key="i">
+            <strong>Template Value - {{i + 1}}</strong>
+            <pre>{{pre(deserialize(serialize(value)))}}</pre>
+          </div>
         </b-tab>
       </b-tabs>
     </div>
@@ -44,7 +43,9 @@ export default {
   data() {
     return {
       template,
-      contents: [parseTemplate(template)],
+      contents: {
+        templateValues: [parseTemplate(template)],
+      },
     };
   },
   components: {
